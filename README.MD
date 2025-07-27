@@ -99,6 +99,17 @@ The console output will also show:
 
 ## 📊 Understanding the Output
 
+
+## 🔄 Analysis Flow
+
+```mermaid
+graph TD
+  A[EDM Overflow Data] --> B[Coordinate System Conversion]
+  B --> C[Geospatial Correlation (5km Radius)]
+  C --> D[Pollutant Match Found]
+  D --> E[Composite Risk Scoring]
+  E --> F[Critical Risk Site Flagged]
+
 ### Risk Score Components
 
 The composite risk score (0-100 scale) weighs:
