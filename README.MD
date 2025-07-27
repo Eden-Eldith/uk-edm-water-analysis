@@ -228,3 +228,16 @@ For questions or issues, please open a GitHub issue.
 ---
 
 **Note:** This analysis is for research and accountability purposes. The identification of high-risk sites is based on correlation analysis and should be validated with field investigations before drawing definitive conclusions about causation.
+
+## How to Cite
+
+If you use this code or data, please cite:
+
+```bibtex
+@software{obrien2025ukedm,
+  author = {O'Brien, P.C.},
+  title = {UK EDM-Water Analysis},
+  year = {2025},
+  publisher = {GitHub},
+  url = {https://github.com/Eden-Eldith/uk-edm-water-analysis}
+}
