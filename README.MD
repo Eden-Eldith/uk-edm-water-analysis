@@ -113,7 +113,16 @@ graph TD
     G --> H[Site Risk Classification]
     H --> I[Critical Risk Sites Flagged]
 ```
-
+---
+### 🔍 Node Legend (optional for README clarity):
+| Node | Description |
+|------|-------------|
+| A    | Raw Excel files from EDM datasets |
+| B    | CSVs from Environment Agency water quality portal |
+| C    | Converts OSGR ↔ Eastings/Northings |
+| D    | Parses pollutant levels and sample coordinates |
+| E    | Matches overflow events to water samples using KDTree |
+| F–I  | Scoring, classification, and flagging pipeline |
 ### Risk Score Components
 
 The composite risk score (0-100 scale) weighs:
