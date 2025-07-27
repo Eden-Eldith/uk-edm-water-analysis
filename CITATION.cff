@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: "UK EDM-Water Analysis: Forensic Analysis Pipeline for Correlating Sewage Overflows with Water Quality"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - given-names: "P.C."
+    family-names: "O'Brien"
+    email: pcobrien@hotmail.co.uk
+    affiliation: "Independent Researcher"
+    orcid: "https://orcid.org/0009-0007-3961-1182"
+identifiers:
+  - type: url
+    value: "https://github.com/Eden-Eldith/uk-edm-water-analysis"
+    description: "GitHub Repository"
+repository-code: "https://github.com/Eden-Eldith/uk-edm-water-analysis"
+url: "https://github.com/Eden-Eldith/uk-edm-water-analysis"
+repository: "https://github.com/Eden-Eldith/uk-edm-water-analysis"
+abstract: "Python analysis tools that overcome incompatible UK government coordinate systems to correlate Event Duration Monitoring (EDM) sewage overflow data with water quality measurements. This forensic analysis pipeline identified 831,706 pollution events and 29 critical-risk overflow sites requiring immediate investigation."
+keywords:
+  - water quality
+  - sewage pollution
+  - EDM analysis
+  - environmental monitoring
+  - UK waters
+  - marine mortality
+  - geospatial analysis
+  - coordinate conversion
+license: MIT
+version: 1.0.0
+date-released: 2025-07-27
