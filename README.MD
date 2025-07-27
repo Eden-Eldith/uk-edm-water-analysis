@@ -104,11 +104,14 @@ The console output will also show:
 
 ```mermaid
 graph TD
-    A[EDM Overflow Data] --> B[Coordinate System Conversion]
-    B --> C[Geospatial Correlation – 5km Radius]
-    C --> D[Pollutant Match Detected]
-    D --> E[Composite Risk Scoring]
-    E --> F[Critical Risk Sites Flagged]
+    A[EDM Overflow Data] --> C[Coordinate System Conversion]
+    B[Water Quality Data] --> D[Pollutant Parsing & Sampling Points]
+    C --> E[Geospatial Correlation – 5km Radius]
+    D --> E
+    E --> F[Pollutant Match Detected]
+    F --> G[Composite Risk Scoring]
+    G --> H[Site Risk Classification]
+    H --> I[Critical Risk Sites Flagged]
 ```
 
 ### Risk Score Components
