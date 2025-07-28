@@ -26,6 +26,12 @@ OUTPUT_FILE = "correlated_events_final.csv"
 RADIUS_METERS = 5000  # 5km radius for correlation
 MIN_DISTANCE_M = 10   # Minimum distance to prevent division by zero
 
+# UK coordinate bounds for validation (approximate)
+UK_EASTING_MIN = 0
+UK_EASTING_MAX = 700000
+UK_NORTHING_MIN = 0
+UK_NORTHING_MAX = 1300000
+
 # Comprehensive pollutant regex including all variations found across iterations
 TARGET_POLLUTANTS_REGEX = r"Oil|Grease|Ammonia|PAH|pyridine|sewage|DO\b|Dissolved\s*Oxygen|Oxygen\s*Diss|BOD|Sld Sus|Suspended\s*Solids"
 DO_SPECIFIC_REGEX = r"\bDO\b|Dissolved\s*Oxygen|Oxygen\s*Diss|Oxygen,\s*Dissolved"
@@ -59,8 +65,16 @@ def parse_duration_to_hours(duration_val):
     return 0.0
 
 
+def validate_uk_coordinates(easting, northing):
+    """Validate that coordinates are within reasonable UK bounds."""
+    if pd.isna(easting) or pd.isna(northing):
+        return False
+    
+    return (UK_EASTING_MIN <= easting <= UK_EASTING_MAX and 
+            UK_NORTHING_MIN <= northing <= UK_NORTHING_MAX)
+
 def parse_osgr(osgr_str):
-    """Convert OS Grid Reference to (easting, northing) coordinates."""
+    """Convert OS Grid Reference to (easting, northing) coordinates with validation."""
     try:
         # Clean and normalize
         osgr_str = re.sub(r'\s+', '', str(osgr_str)).upper()
@@ -105,9 +119,16 @@ def parse_osgr(osgr_str):
             return None, None
         
         base_e, base_n = grid_map[grid_letters]
-        return base_e + east_val, base_n + north_val
+        final_easting = base_e + east_val
+        final_northing = base_n + north_val
         
-    except (ValueError, TypeError):
+        # Validate coordinates are within UK bounds
+        if not validate_uk_coordinates(final_easting, final_northing):
+            return None, None
+        
+        return final_easting, final_northing
+        
+    except (ValueError, TypeError, AttributeError):
         return None, None
 
 
@@ -237,8 +258,14 @@ def load_all_edm_data(directory):
 
 
 def load_sample_data(filepath):
-    """Load and standardize a sample CSV file."""
-    df = pd.read_csv(filepath, low_memory=False)
+    """Load and standardize a sample CSV file with enhanced validation."""
+    try:
+        df = pd.read_csv(filepath, low_memory=False)
+    except Exception as e:
+        raise ValueError(f"Failed to load CSV file {filepath}: {e}")
+    
+    if df.empty:
+        raise ValueError(f"CSV file {filepath} is empty")
     
     # Map columns (case-insensitive)
     column_mapping = {}
@@ -276,6 +303,14 @@ def load_sample_data(filepath):
     if northing_col:
         column_mapping[northing_col] = 'sample_northing'
     
+    # Check if essential columns exist
+    essential_mappings = {'sample_easting': easting_col, 'sample_northing': northing_col, 
+                         'pollutant': pollutant_col, 'sample_datetime': datetime_col}
+    missing_essentials = [key for key, val in essential_mappings.items() if val is None]
+    
+    if missing_essentials:
+        raise ValueError(f"Missing essential columns in {filepath}: {missing_essentials}")
+    
     # Rename columns
     df = df.rename(columns=column_mapping)
     
@@ -283,9 +318,25 @@ def load_sample_data(filepath):
     if 'result' in df.columns:
         df['result'] = df['result'].astype(str).str.replace('<', '').str.replace('>', '')
     
-    # Parse datetime
+    # Parse datetime with better error handling
     if 'sample_datetime' in df.columns:
-        df['sample_datetime'] = pd.to_datetime(df['sample_datetime'], errors='coerce')
+        df['sample_datetime'] = pd.to_datetime(df['sample_datetime'], errors='coerce', utc=True)
+        # Convert to local time (assuming UK data)
+        df['sample_datetime'] = df['sample_datetime'].dt.tz_convert('Europe/London').dt.tz_localize(None)
+    
+    # Validate and convert coordinates
+    if 'sample_easting' in df.columns:
+        df['sample_easting'] = pd.to_numeric(df['sample_easting'], errors='coerce')
+    if 'sample_northing' in df.columns:
+        df['sample_northing'] = pd.to_numeric(df['sample_northing'], errors='coerce')
+    
+    # Validate coordinate ranges
+    initial_count = len(df)
+    if 'sample_easting' in df.columns and 'sample_northing' in df.columns:
+        df = df[df.apply(lambda row: validate_uk_coordinates(row['sample_easting'], row['sample_northing']), axis=1)]
+        invalid_coords = initial_count - len(df)
+        if invalid_coords > 0:
+            print(f"  ⚠️  Filtered out {invalid_coords} samples with invalid coordinates")
     
     # Drop rows with missing essential data
     required_cols = ['pollutant', 'sample_easting', 'sample_northing', 'sample_datetime', 'result']
