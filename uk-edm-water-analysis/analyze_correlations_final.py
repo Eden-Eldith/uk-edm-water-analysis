@@ -113,6 +113,20 @@ def analyze_correlations(filepath):
         print(f"\n❌ ERROR loading file: {e}")
         return
     
+    # Validate required columns
+    required_columns = ['year', 'overflow_site', 'pollutant_result', 'distance_m', 
+                       'overflow_spill_count', 'overflow_spill_duration_hrs', 'is_dissolved_oxygen']
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        print(f"\n❌ ERROR: Missing required columns: {missing_columns}")
+        print("   Expected columns from batch_filter_final.py output")
+        return
+    
+    # Validate data types and ranges
+    if df.empty:
+        print("\n❌ ERROR: Input file is empty")
+        return
+    
     # Data preparation
     df['pollutant_numeric'] = pd.to_numeric(df['pollutant_result'], errors='coerce')
     initial_count = len(df)
@@ -238,9 +252,11 @@ def analyze_correlations(filepath):
     
     # 4. Add persistence bonus (up to 10% for multi-year offenders)
     max_years = summary['years_active'].max()
-    if max_years > 0:
+    if max_years > 1:  # Only apply bonus if there are multi-year offenders
         summary['persistence_bonus'] = (summary['years_active'] / max_years) * 0.1
         summary['composite_risk_score'] *= (1 + summary['persistence_bonus'])
+    else:
+        summary['persistence_bonus'] = 0.0
     
     # 5. Categorize risk levels
     summary['risk_category'] = pd.cut(
