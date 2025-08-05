@@ -1,3 +1,4 @@
+[Final paper here:](https://doi.org/10.5281/zenodo.16503478)
 # UK EDM-Water Analysis
 
 This repository contains a forensic analysis pipeline for correlating UK **Event Duration Monitoring (EDM)** sewage overflow data with **Water Quality** measurements (2020–2024). The analysis identifies high-risk pollution sites and potential marine mortality events through geospatial correlation and composite risk scoring.
